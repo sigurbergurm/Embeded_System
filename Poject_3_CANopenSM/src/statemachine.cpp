@@ -6,22 +6,21 @@
 stateMachine::stateMachine(){
     //Initilization
     ledUsed = false;
-    state = 1; 
+    state = 1;
     //Initialising digital and analog pins
     stateMachine::ledTimer.init();
     stateMachine::lightInput.init();
 }
 
-stateMachine::stateMachine(bool LED){
+void stateMachine::ledOperation(){
 
     // Serial.println(stateMachine::lightInput.read());
-    if(LED){
+    if(ledUsed){
         //The LED is in use so do something else
         ledIntensity = map(stateMachine::lightInput.read(),400,860,0,255);
         stateMachine::ledTimer.set(ledIntensity);
     }
     else{
-        ledUsed = false;
         stateMachine::ledTimer.set(255);
     }
     
@@ -62,16 +61,23 @@ void stateMachine::updateState(char stepOrBack)
     //Goes to next state according to statemachine
     //According to the char that is sent in
     // 's' = step, 'b' = back
-
+    if(stepOrBack == 'r')
+    {
+        state = 1;
+    }
     switch (state)
     {
     case 1:              //Initilization state
+        state = 2;
+        break;
+    case 2:                 //Pre Operational
         if(stepOrBack == 's')
         {
             state = 3;
         }
         break;
     case 3:                //Operatinal state
+        
         if(stepOrBack == 's')
         {
             state = 3;    //For now since we are only in part 1
@@ -80,9 +86,8 @@ void stateMachine::updateState(char stepOrBack)
         {
             state = 1;
         }
-        
         break;
-        
+
     default:
         Serial.print("Something went wrong state out of bounds");
         break;
@@ -106,12 +111,31 @@ void stateMachine::operationToDo(){
     switch (state)
     {
     case 1:             //Initilization
+    {  
         stateMachine();
         break;
-    case 3:             //Operational
-        stateMachine(true);
+    }
+    case 2:
+    { 
+        while(!Serial.available());
+        char serRead1 = Serial.read();
+        if( serRead1 == '1')
+        {
+            ledUsed = true;
+            
+        }
+        else if( serRead1 == '2')
+        {
+            ledUsed = false;     
+        }
+        updateState('s');  
+    }
         break;
-
+    case 3:             //Operational
+    { 
+        ledOperation();
+        break;
+    }
     
     default:
         break;
