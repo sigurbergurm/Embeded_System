@@ -9,14 +9,14 @@ class stateMachine{
 
     public:
         stateMachine();
-        stateMachine(bool LED);
+        
         void updateState(char stepOrBack);
         void stop();
         void restart();
         
         //Operations of each state
         void operationToDo();
-        
+        void ledOperation();
 
     private:
         int state;             //Initilization = 1, Operational = 3                   
